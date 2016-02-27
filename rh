@@ -1,0 +1,53 @@
+#!/bin/sh
+
+if [ "$1" = "-h" ]
+then
+    echo "usage: $0 command"
+    exit
+fi
+
+RHELL_CMD=$@
+
+CFG_CHANGED="no"
+
+if [ -f ~/.rhell.cfg ]
+then
+    source ~/.rhell.cfg
+fi
+
+if [ "$RHELL_URL" = "" ]
+then
+    echo "Please, enter the URL of the remote shell:"
+    read -e RHELL_URL
+    CFG_CHANGED="yes"
+fi
+
+if [ "$RHELL_PASSWORD" = "" ]
+then
+    echo "Please, enter the PASSWORD for the remote shell:"
+    read -e RHELL_PASSWORD
+    CFG_CHANGED="yes"
+fi
+
+if [ "$RHELL_METHOD" = "" ]
+then
+    echo "Please, enter the HTTP METHOD for the remote shell (GET or POST):"
+    read -e RHELL_METHOD
+    CFG_CHANGED="yes"
+fi
+
+if [ "$CFG_CHANGED" = "yes" ]
+then
+    echo "RHELL_URL=$RHELL_URL" > ~/.rhell.cfg
+    echo "RHELL_METHOD=$RHELL_METHOD" >> ~/.rhell.cfg
+    echo "RHELL_PASSWORD=$RHELL_PASSWORD" >> ~/.rhell.cfg
+    echo "Config saved to ~/.rhell.cfg."
+fi
+
+if [ "$RHELL_METHOD" = "POST" ]
+then
+	curl --data-urlencode "password=$RHELL_PASSWORD" --data-urlencode "cmd=$RHELL_CMD" $RHELLURL
+else
+	curl -G --data-urlencode "password=$RHELL_PASSWORD" --data-urlencode "cmd=$RHELL_CMD" $RHELL_URL
+fi
+
